@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCD LCM Notebook Build Corrected</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Trebuchet MS','Noto Sans Thai',sans-serif}
+body{min-height:100vh;background:linear-gradient(135deg,#fff7dc,#e8fbff 48%,#f2efff);color:#123;overflow:hidden}
+.bg{position:fixed;inset:0;background-image:radial-gradient(circle at 12% 15%,rgba(255,211,80,.42),transparent 16%),radial-gradient(circle at 86% 18%,rgba(95,210,255,.34),transparent 18%),radial-gradient(circle at 52% 90%,rgba(180,135,255,.22),transparent 22%);z-index:-2}
+.grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,120,160,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,120,160,.06) 1px,transparent 1px);background-size:42px 42px;z-index:-1}
+.screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:20px}
+#start{display:flex;flex-direction:column}
+.title{font-size:clamp(34px,6vw,76px);font-weight:1000;color:#155e75;text-shadow:0 4px 0 #fff,0 0 24px rgba(0,170,220,.26);margin-bottom:14px}
+.card{width:min(1120px,96%);background:rgba(255,255,255,.86);border:3px solid rgba(21,94,117,.18);border-radius:34px;padding:24px;box-shadow:0 22px 60px rgba(55,90,130,.18);font-size:clamp(18px,2.1vw,28px);line-height:1.6;margin-bottom:20px}
+.hi{color:#e67e00;font-weight:1000}
+input.name{width:min(460px,90%);font-size:26px;padding:16px 20px;border-radius:20px;border:3px solid #2bb6d6;text-align:center;outline:none;margin:14px auto 18px;background:#fff;display:block}button{border:none;border-radius:24px;padding:16px 30px;font-size:clamp(18px,2vw,30px);font-weight:1000;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.15);transition:.15s}
+button:hover{transform:translateY(-2px) scale(1.03)}
+.primary{background:linear-gradient(45deg,#20c997,#ffd166);color:#082b2f}.secondary{background:linear-gradient(45deg,#8ec5ff,#e0c3fc);color:#10243a}.danger{background:linear-gradient(45deg,#ff6b6b,#ffd166);color:#3a0909}
+#game{display:none;flex-direction:column;justify-content:flex-start;padding:12px;overflow-y:auto}
+.top{width:min(1500px,98%);display:flex;justify-content:space-between;align-items:center;margin:0 auto 12px;background:rgba(255,255,255,.86);border-radius:28px;padding:13px 22px;box-shadow:0 12px 30px rgba(0,0,0,.09);font-size:clamp(20px,2.2vw,38px);font-weight:1000}.timer{color:#e67e00}.timer.low{color:#d90429;animation:pulse .35s infinite}@keyframes pulse{50%{transform:scale(1.12)}}
+.notebook{width:min(1500px,98%);margin:0 auto;background:repeating-linear-gradient(#fff 0,#fff 42px,#e6f4ff 43px,#e6f4ff 45px);border-left:18px solid #ff8fab;border-radius:34px;border:4px solid rgba(43,182,214,.28);box-shadow:0 24px 70px rgba(55,90,130,.18);padding:20px;text-align:center}
+.q{font-size:clamp(30px,4.6vw,70px);font-weight:1000;color:#155e75;text-shadow:0 3px 0 #fff;margin-bottom:8px}
+.mode{display:inline-block;background:#155e75;color:white;border-radius:999px;padding:8px 22px;font-size:clamp(18px,2vw,32px);font-weight:1000;margin-bottom:12px}
+.rows{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.factorBox{background:rgba(255,255,255,.8);border:3px dashed rgba(43,182,214,.45);border-radius:26px;padding:16px}
+.factorTitle{font-size:clamp(22px,2.2vw,36px);font-weight:1000;color:#e67e00;margin-bottom:10px}
+.factorRow{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px}
+.slot{width:76px;height:62px;border-radius:18px;border:3px solid #90e0ef;background:#fff;font-size:30px;font-weight:1000;text-align:center;color:#123;box-shadow:inset 0 0 12px rgba(0,180,216,.12);padding:0 4px}
+.slot:focus{outline:none;border-color:#ffb703;box-shadow:0 0 0 4px rgba(255,183,3,.22)}
+.num{width:82px;height:68px;border-radius:20px;border:4px solid #90e0ef;background:#fff;font-size:34px;font-weight:1000;color:#123;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.08),inset 0 0 12px rgba(0,180,216,.12);transition:.18s}
+.num:hover{transform:scale(1.08)}
+.num.pending{background:#fff3bf;border-color:#ffb703;color:#8a4b00;transform:scale(1.08)}
+.num.red{background:#ffe1e1;border-color:#ff5c8a;color:#9b0038}
+.num.blue{background:#dff5ff;border-color:#2bb6d6;color:#005f73}
+.num.used{opacity:.45;filter:grayscale(.25);pointer-events:none}
+.times{font-size:34px;font-weight:1000;color:#155e75}
+.buildArea{background:rgba(255,248,220,.86);border:3px solid rgba(255,183,3,.42);border-radius:28px;padding:16px;margin-top:14px}
+.buildTitle{font-size:clamp(24px,2.6vw,44px);font-weight:1000;color:#155e75;margin-bottom:8px}
+.product{min-height:72px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;font-size:clamp(28px,3vw,52px);font-weight:1000;color:#e67e00}
+.token{min-width:68px;height:58px;border-radius:18px;background:#fff;border:3px solid #ffd166;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(0,0,0,.08);animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.resultLine{font-size:clamp(28px,3.2vw,56px);font-weight:1000;color:#08956f;margin-top:8px}
+.answerInput{width:160px;height:66px;border-radius:20px;border:4px solid #ffd166;background:#fff;font-size:36px;text-align:center;font-weight:1000;color:#123}
+.lcmTools{display:none;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}.lcmTools.show{display:flex}.miniMode{background:#fff;border:3px solid #90e0ef;color:#155e75}.miniMode.active{background:linear-gradient(45deg,#155e75,#2bb6d6);color:white}.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.feedback{min-height:52px;font-size:clamp(24px,3vw,50px);font-weight:1000;margin-top:10px;text-shadow:0 3px 0 #fff}
+.good{color:#08956f}.bad{color:#d90429}.warn{color:#e67e00}
+.fly{position:fixed;z-index:9999;width:70px;height:56px;border-radius:18px;background:#fff;border:3px solid #ffd166;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:1000;color:#e67e00;pointer-events:none;transition:all .55s cubic-bezier(.2,.9,.2,1)}
+.flower{position:fixed;top:-40px;z-index:9999;font-size:clamp(26px,3vw,48px);pointer-events:none;animation:flowerFall 2.2s linear forwards;text-shadow:0 4px 8px rgba(0,0,0,.14)}
+@keyframes flowerFall{0%{transform:translateY(-40px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(520deg);opacity:0}}
+@media(max-width:800px){
+ body{overflow:auto}.screen{position:relative;min-height:100vh}#game{min-height:100vh;padding:8px 7px}.top{font-size:15px;padding:8px;gap:6px;position:sticky;top:6px;z-index:5}
+ .notebook{padding:12px 8px;border-left:10px solid #ff8fab;border-radius:22px;width:100%}.q{font-size:clamp(26px,9vw,40px)}.rows{grid-template-columns:1fr;gap:10px}.factorBox{padding:10px;border-radius:18px}
+ .slot,.num{width:54px;height:48px;font-size:22px;border-radius:14px}.times{font-size:22px}.product{font-size:26px}.token{min-width:48px;height:44px;font-size:23px}.resultLine{font-size:28px}.answerInput{width:120px;height:52px;font-size:28px}button{padding:11px 14px;font-size:17px}.feedback{font-size:20px}
+}
+@media print{
+ body{background:white!important;overflow:visible!important}
+ .bg,.grid,button{display:none!important}
+ .screen{position:static!important;display:block!important;min-height:auto!important}
+ #start,#game{display:none!important}
+ #result{display:block!important}
+ .notebook{box-shadow:none!important;border:2px solid #333!important;background:white!important;width:100%!important}
+ .card{box-shadow:none!important;border:1px solid #555!important}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="grid"></div>
+
+<section id="start" class="screen">
+  <div class="title">📒 GCD LCM NOTEBOOK MISSION</div>
+  <div class="card">
+    Level 1 จำนวน <span class="hi">10 ข้อ</span>: เด็กต้องแยกตัวประกอบเองก่อน ✨<br>
+    จากนั้นกด “สร้างปุ่มจากคำตอบ” แล้วค่อยเลือกตัวร่วมเพื่อหา ห.ร.ม. และ ค.ร.น.<br><br>
+    ⏰ ข้อละ <span class="hi">120 วินาที</span><br>
+    ✅ ทำครบถูกต้อง = <span class="hi">+2 คะแนน</span><br>
+    ❌ ถ้าแยกตัวประกอบผิด หรือเลือกผิด = <span class="hi">รีเซตกลับข้อแรก</span>
+  </div>
+  <input id="playerName" class="name" placeholder="พิมพ์ชื่อ-สกุลผู้ทำแบบทดสอบ"><button class="primary" onclick="startGame()">เริ่มทำแบบทดสอบ</button>
+</section>
+
+<section id="game" class="screen">
+  <div class="top">
+    <div id="progress">ข้อ 1/10</div>
+    <div id="score">⭐ 0</div>
+    <div id="target">ขั้นที่ 1: แยกตัวประกอบ</div><div id="timer" class="timer">⏰ 120</div>
+  </div>
+  <div class="notebook">
+    <div class="q" id="question"></div>
+    <div class="mode" id="modeLabel">แยกตัวประกอบเอง</div>
+    <div class="rows">
+      <div class="factorBox">
+        <div class="factorTitle" id="titleA"></div>
+        <div class="factorRow" id="rowA"></div>
+      </div>
+      <div class="factorBox">
+        <div class="factorTitle" id="titleB"></div>
+        <div class="factorRow" id="rowB"></div>
+      </div>
+    </div>
+    <div class="buildArea">
+      <div class="buildTitle" id="buildTitle">คำตอบที่เลือก =</div>
+      <div class="product" id="product"></div>
+      <div class="resultLine" id="resultLine"></div>
+    </div>
+    <div class="lcmTools" id="lcmTools">
+      <button class="miniMode active" id="pairModeBtn" onclick="setLcmPickMode('pair')">กดเลขที่ซ้ำ</button>
+      <button class="miniMode" id="singleModeBtn" onclick="setLcmPickMode('single')">กดเลขที่เหลือ</button>
+    </div>
+    <div class="actions">
+      <button class="primary" id="mainBtn" onclick="mainAction()">สร้างปุ่มจากคำตอบ</button>
+      <button class="secondary" onclick="undoLast()">ย้อนกลับ / ยกเลิกคู่</button>
+      <button class="danger" onclick="resetStep()">ล้างขั้นนี้</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</section>
+
+<section id="result" class="screen">
+  <div class="notebook" style="text-align:center">
+    <div class="title">🏆 GCD LCM REPORT</div>
+    <div class="card" id="resultCard"></div>
+    <button class="primary" onclick="location.reload()">เล่นอีกครั้ง</button>
+  </div>
+</section>
+
+<script>
+const questions=[
+ {a:12,b:18,fa:[2,2,3],fb:[2,3,3],gcd:[2,3],lcm:[2,2,3,3],g:6,l:36},
+ {a:16,b:24,fa:[2,2,2,2],fb:[2,2,2,3],gcd:[2,2,2],lcm:[2,2,2,2,3],g:8,l:48},
+ {a:20,b:30,fa:[2,2,5],fb:[2,3,5],gcd:[2,5],lcm:[2,2,3,5],g:10,l:60},
+ {a:18,b:27,fa:[2,3,3],fb:[3,3,3],gcd:[3,3],lcm:[2,3,3,3],g:9,l:54},
+ {a:24,b:36,fa:[2,2,2,3],fb:[2,2,3,3],gcd:[2,2,3],lcm:[2,2,2,3,3],g:12,l:72},
+ {a:28,b:42,fa:[2,2,7],fb:[2,3,7],gcd:[2,7],lcm:[2,2,3,7],g:14,l:84},
+ {a:32,b:48,fa:[2,2,2,2,2],fb:[2,2,2,2,3],gcd:[2,2,2,2],lcm:[2,2,2,2,2,3],g:16,l:96},
+ {a:36,b:45,fa:[2,2,3,3],fb:[3,3,5],gcd:[3,3],lcm:[2,2,3,3,5],g:9,l:180},
+ {a:40,b:60,fa:[2,2,2,5],fb:[2,2,3,5],gcd:[2,2,5],lcm:[2,2,2,3,5],g:20,l:120},
+ {a:42,b:56,fa:[2,3,7],fb:[2,2,2,7],gcd:[2,7],lcm:[2,2,2,3,7],g:14,l:168}
+];
+let idx=0,stage="factor",built=[],pending=null,score=0,studentA=[],studentB=[],lcmPickMode="pair",time=120,timerInterval=null,wrongResetCount=0,player="";
+
+function beep(freq=600,dur=90){try{const ac=new (window.AudioContext||window.webkitAudioContext)(),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq;o.type="triangle";g.gain.value=.07;o.connect(g);g.connect(ac.destination);o.start();setTimeout(()=>{o.stop();ac.close()},dur)}catch(e){}}
+function flowerRain(){const emojis=["🌸","🌼","🌺","💮","🌷"];for(let i=0;i<55;i++){const f=document.createElement("div");f.className="flower";f.textContent=emojis[Math.floor(Math.random()*emojis.length)];f.style.left=Math.random()*100+"vw";f.style.animationDelay=(Math.random()*.55)+"s";f.style.animationDuration=(1.6+Math.random()*1.1)+"s";document.body.appendChild(f);setTimeout(()=>f.remove(),3100)}}
+function startGame(){
+ player=(document.getElementById("playerName")?.value||"").trim()||"ไม่ระบุชื่อ";
+ start.style.display="none";
+ game.style.display="flex";
+ loadQ();
+}
+function scoreEl(){score.textContent=`⭐ ${window.score||0}`}
+function startTimer(){clearInterval(timerInterval);time=120;updateTimer();timerInterval=setInterval(()=>{time--;updateTimer();if(time<=0){clearInterval(timerInterval);feedback.className="feedback bad";feedback.textContent="หมดเวลา! ระบบรีเซตกลับข้อแรก 🌪️";wrongResetCount++;beep(180,180);setTimeout(resetToStart,1200)}},1000)}
+function updateTimer(){const t=document.getElementById("timer");if(!t)return;t.textContent=`⏰ ${time}`;t.className=time<=10?"timer low":"timer"}
+function loadQ(){
+ if(idx>=questions.length){endGame();return}
+ stage="factor";built=[];pending=null;studentA=[];studentB=[];clearInterval(timerInterval);feedback.textContent="";
+ const q=questions[idx];
+ progress.textContent=`ข้อ ${idx+1}/${questions.length}`;scoreEl();
+ question.textContent=`หา ห.ร.ม. และ ค.ร.น. ของ ${q.a} และ ${q.b}`;
+ titleA.textContent=`${q.a} =`; titleB.textContent=`${q.b} =`;
+ renderFactorInputs(); renderBuild(); startTimer();
+}
+function renderFactorInputs(){
+ const q=questions[idx]; rowA.innerHTML=""; rowB.innerHTML="";
+ makeInputs(rowA,q.fa.length,"a"); makeInputs(rowB,q.fb.length,"b");
+ modeLabel.textContent="ขั้นที่ 1: แยกตัวประกอบเอง";
+ target.textContent="ขั้นที่ 1: แยกตัวประกอบ";
+ mainBtn.textContent="สร้างปุ่มจากคำตอบ";
+ buildTitle.textContent="หลังเติมครบ กดสร้างปุ่ม";
+}
+function makeInputs(container,count,group){
+ for(let i=0;i<count;i++){
+   const inp=document.createElement("input");
+   inp.className="slot"; inp.inputMode="numeric"; inp.type="text"; inp.pattern="[0-9]*"; inp.dataset.group=group;
+   inp.addEventListener("input",()=>inp.value=inp.value.replace(/[^0-9]/g,""));
+   inp.addEventListener("keydown",e=>{const all=[...document.querySelectorAll(".slot,.answerInput")];const pos=all.indexOf(inp);if(e.key==="Enter"&&all[pos+1]){e.preventDefault();all[pos+1].focus()}});
+   container.appendChild(inp);
+   if(i<count-1){const x=document.createElement("span");x.className="times";x.textContent="×";container.appendChild(x)}
+ }
+}
+function mainAction(){
+ if(stage==="factor") buildButtonsFromInputs();
+ else checkStep();
+}
+function buildButtonsFromInputs(){
+ const q=questions[idx];
+ studentA=[...document.querySelectorAll('.slot[data-group="a"]')].map(x=>Number(x.value));
+ studentB=[...document.querySelectorAll('.slot[data-group="b"]')].map(x=>Number(x.value));
+ if([...studentA,...studentB].some(v=>v<=0)){feedback.className="feedback warn";feedback.textContent="เติมตัวประกอบให้ครบก่อนนะจ๊ะ";return}
+ if(!arraysEqual(studentA,q.fa)||!arraysEqual(studentB,q.fb)){
+   clearInterval(timerInterval);
+   wrongResetCount++;
+   feedback.className="feedback bad";
+   feedback.textContent="แยกตัวประกอบผิดจ้า! ระบบรีเซตกลับข้อแรก 🌪️";
+   beep(180,150);
+   setTimeout(resetToStart,1200);
+   return;
+ }
+ stage="gcd";built=[];pending=null;renderNumberButtons();renderBuild();
+ feedback.className="feedback good";feedback.textContent="แยกตัวประกอบถูกต้อง! ต่อไปกดคู่ตัวร่วมเพื่อหา ห.ร.ม.";flowerRain();beep(880,120);
+}
+function renderNumberButtons(){
+ rowA.innerHTML=""; rowB.innerHTML="";
+ makeRow(rowA,studentA,"a"); makeRow(rowB,studentB,"b");
+}
+function makeRow(container,arr,group){
+ arr.forEach((n,i)=>{
+   const btn=document.createElement("div");
+   btn.className="num"; btn.textContent=n; btn.dataset.group=group; btn.dataset.index=i; btn.dataset.value=n;
+   btn.onclick=()=>pick(btn); container.appendChild(btn);
+   if(i<arr.length-1){const x=document.createElement("span");x.className="times";x.textContent="×";container.appendChild(x)}
+ });
+}
+function pick(btn){
+ if(btn.classList.contains("used"))return;
+ const val=Number(btn.dataset.value), group=btn.dataset.group;
+ if(stage==="gcd") pickPairOnly(btn,val,group);
+ else pickLcmSmart(btn,val,group);
+}
+function pickPairOnly(btn,val,group){ // for GCD: only pair allowed
+ if(!pending){setPending(btn,val,group,`เลือก ${val} แล้ว เลือก ${val} อีกฝั่งเพื่อจับคู่`);return}
+ if(cancelOrReplace(btn,val,group))return;
+ if(pending.group===group){replacePending(btn,val,group,"ต้องเลือกอีกฝั่งนะจ๊ะ");return}
+ if(pending.val!==val){clearPending("ยังไม่ใช่คู่เดียวกัน เลือกใหม่จ้า");return}
+ completePair(btn,val,group);
+}
+function setLcmPickMode(mode){
+ lcmPickMode=mode;
+ if(pairModeBtn&&singleModeBtn){
+   pairModeBtn.className=mode==="pair"?"miniMode active":"miniMode";
+   singleModeBtn.className=mode==="single"?"miniMode active":"miniMode";
+ }
+ if(pending){pending.el.classList.remove("pending");pending=null;}
+ feedback.className="feedback warn";
+ feedback.textContent=mode==="pair"?"โหมดเลขซ้ำ: เลือกเลขเดียวกันข้างละ 1 ตัว":"โหมดเลขที่เหลือ: กดทีละตัวแล้วลงช่องทันที";
+ beep(480,70);
+}
+function pickLcmSmart(btn,val,group){
+ if(lcmPickMode==="single"){
+   completeSingle(btn,val,group);
+   return;
+ }
+ // pair mode: must pick same number from opposite side, then send only one number
+ if(!pending){
+   setPending(btn,val,group,`เลือก ${val} แล้ว เลือก ${val} อีกฝั่งเพื่อจับคู่เลขซ้ำ`);
+   return;
+ }
+ if(cancelOrReplace(btn,val,group))return;
+ if(pending.group===group){replacePending(btn,val,group,"ต้องเลือกเลขซ้ำจากอีกฝั่งนะจ๊ะ");return}
+ if(pending.val!==val){clearPending("ยังไม่ใช่คู่ซ้ำ เลือกใหม่จ้า");return}
+ completePair(btn,val,group);
+}
+function setPending(btn,val,group,msg){pending={val,group,el:btn};btn.classList.add("pending");feedback.className="feedback warn";feedback.textContent=msg;beep(520,70)}
+function cancelOrReplace(btn,val,group){if(pending.el===btn){pending.el.classList.remove("pending");pending=null;feedback.textContent="";return true}return false}
+function replacePending(btn,val,group,msg){pending.el.classList.remove("pending");pending={val,group,el:btn};btn.classList.add("pending");feedback.className="feedback warn";feedback.textContent=msg;beep(300,80)}
+function clearPending(msg){pending.el.classList.remove("pending");pending=null;feedback.className="feedback bad";feedback.textContent=msg;beep(180,130)}
+function completePair(btn,val,group){
+ pending.el.classList.remove("pending");
+ pending.el.classList.add(pending.group==="a"?"red":"blue","used");
+ btn.classList.add(group==="a"?"red":"blue","used");
+ built.push(val); flyNumber(btn,val); pending=null;
+ feedback.className="feedback good";feedback.textContent=`จับคู่ ${val} สำเร็จ ลงช่อง 1 ตัว`;
+ beep(760,80);setTimeout(()=>beep(980,90),80);setTimeout(renderBuild,560);
+}
+function completeSingle(btn,val,group){
+ btn.classList.remove("pending");btn.classList.add(group==="a"?"red":"blue","used");
+ built.push(val);flyNumber(btn,val);
+ feedback.className="feedback good";feedback.textContent=`เพิ่มตัวเหลือ ${val} ใน ค.ร.น.`;
+ beep(640,70);setTimeout(renderBuild,560);
+}
+function flyNumber(from,val){const r=from.getBoundingClientRect(),t=product.getBoundingClientRect();const f=document.createElement("div");f.className="fly";f.textContent=val;f.style.left=r.left+"px";f.style.top=r.top+"px";document.body.appendChild(f);requestAnimationFrame(()=>{f.style.left=(t.left+t.width/2-35)+"px";f.style.top=(t.top+10)+"px";f.style.transform="scale(.65)"});setTimeout(()=>f.remove(),650)}
+function renderBuild(){
+ const label=stage==="gcd"?"ห.ร.ม.":stage==="lcm"?"ค.ร.น.":"";
+ modeLabel.textContent=stage==="factor"?"ขั้นที่ 1: แยกตัวประกอบเอง":`หา ${label}`;
+ target.textContent=stage==="factor"?"ขั้นที่ 1: แยกตัวประกอบ":`เป้าหมาย: ${label}`;
+ if(stage!=="factor"){buildTitle.textContent=`${label} =`; mainBtn.textContent="ตรวจขั้นนี้";}
+ const tools=document.getElementById("lcmTools");
+ if(tools){tools.className=stage==="lcm"?"lcmTools show":"lcmTools";}
+ product.innerHTML="";
+ built.forEach((v,i)=>{const tok=document.createElement("div");tok.className="token";tok.textContent=v;product.appendChild(tok);if(i<built.length-1){const x=document.createElement("span");x.className="times";x.textContent="×";product.appendChild(x)}});
+ resultLine.innerHTML=stage==="factor"?"":`= <input id="answerBox" class="answerInput" inputmode="numeric" pattern="[0-9]*" placeholder="?">`;
+ const ans=document.getElementById("answerBox"); if(ans) ans.addEventListener("input",()=>ans.value=ans.value.replace(/[^0-9]/g,""));
+}
+function resetStep(){pending=null;built=[];if(stage==="factor")renderFactorInputs();else{renderNumberButtons();renderBuild()}feedback.textContent="";beep(300,80)}
+function undoLast(){if(pending){pending.el.classList.remove("pending");pending=null;feedback.textContent="ยกเลิกตัวที่เลือกค้างแล้ว";return}feedback.className="feedback warn";feedback.textContent="ถ้าต้องการแก้ ให้กดล้างขั้นนี้เพื่อกันสีสับสนจ้า";beep(360,70)}
+function arraysEqual(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i])}
+function arraysSameAnyOrder(a,b){const x=[...a].sort((m,n)=>m-n), y=[...b].sort((m,n)=>m-n);return x.length===y.length&&x.every((v,i)=>v===y[i])}
+function checkStep(){
+ if(stage==="lcm" && pending){feedback.className="feedback warn";feedback.textContent="ยังมีเลขที่เลือกค้างอยู่ ถ้าเป็นเลขซ้ำให้กดคู่ให้ครบ หรือกดยกเลิกก่อนตรวจ";return}
+ const q=questions[idx], vals=[...built], ans=Number((document.getElementById("answerBox")?.value||"").replace(/[^0-9]/g,""));
+ const targetArr=stage==="gcd"?q.gcd:q.lcm, targetAns=stage==="gcd"?q.g:q.l;
+ if(!ans){feedback.className="feedback warn";feedback.textContent="เติมผลคูณในช่องว่างก่อนนะจ๊ะ";return}
+ if(arraysSameAnyOrder(vals,targetArr)&&ans===targetAns){
+   feedback.className="feedback good";feedback.textContent=stage==="gcd"?"ห.ร.ม. ถูกต้อง! ไปต่อ ค.ร.น. ✨":"ครบทั้ง ห.ร.ม. และ ค.ร.น. 🎉";
+   flowerRain();beep(880,120);setTimeout(()=>beep(1120,140),120);
+   if(stage==="gcd"){setTimeout(()=>{stage="lcm";lcmPickMode="pair";built=[];pending=null;renderNumberButtons();renderBuild();setLcmPickMode("pair");feedback.textContent="ค.ร.น.: ใช้ปุ่มเลือกโหมด — เลขซ้ำให้กดคู่ / เลขที่เหลือให้กดเดี่ยว";feedback.className="feedback warn"},1500)}
+   else{clearInterval(timerInterval);window.score=(window.score||0)+2;scoreEl();setTimeout(()=>{idx++;loadQ()},1700)}
+ }else{
+   clearInterval(timerInterval);
+   wrongResetCount++;
+   feedback.className="feedback bad";
+   feedback.textContent="ยังไม่ถูกจ้า! ระบบรีเซตกลับข้อแรก 🌪️";
+   beep(180,160);
+   setTimeout(resetToStart,1200);
+ }
+}
+function resetToStart(){clearInterval(timerInterval);idx=0;window.score=0;loadQ()}
+function endGame(){
+ clearInterval(timerInterval);
+ game.style.display="none";
+ result.style.display="flex";
+ const max=questions.length*2;
+ const final=window.score||0;
+ const percent=Math.round(final/max*100);
+ resultCard.innerHTML=`<div style="font-size:clamp(26px,3vw,44px);font-weight:1000;color:#155e75;margin-bottom:10px">ชื่อผู้ทำแบบทดสอบ: ${player}</div>
+ <div style="font-size:clamp(58px,8vw,110px);font-weight:1000;color:#155e75;text-shadow:0 4px 0 #dff7ff">${final}/${max}</div>
+ <div style="font-size:clamp(22px,3vw,42px);line-height:1.6">
+ คิดเป็น ${percent}%<br>
+ รีเซตจากคำตอบผิด/หมดเวลา ${wrongResetCount} ครั้ง<br>
+ สถานะ: ${percent>=80?"ผ่าน":"ไม่ผ่าน"}<br>
+ ${percent>=80?"🌟 ผ่านภารกิจ ห.ร.ม. / ค.ร.น. Level 1 แล้วจ้า!":"💪 ลองอีกครั้ง จะเข้าใจขั้นตอนในสมุดมากขึ้น"}
+ </div>
+ <div style="font-size:clamp(16px,2vw,24px);margin-top:14px;color:#456">หมายเหตุ: กดปุ่มด้านล่าง แล้วเลือก Save as PDF หรือ Microsoft Print to PDF / Word ได้ตามเครื่อง</div>
+ <button class="secondary" onclick="window.print()" style="margin-top:18px">พิมพ์ / บันทึกส่งครู</button>`;
+ flowerRain();
+}
+</script>
+</body>
+</html>
